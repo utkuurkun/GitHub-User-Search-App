@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import SwiftData
+import RealmSwift
 
 @MainActor
 class MainViewModel: ObservableObject {
@@ -16,15 +16,20 @@ class MainViewModel: ObservableObject {
     @Published var isLoading: Bool = false // Indicates if a search is in progress
     @Published var errorMessage: String? = nil // Error handling
 
-    private let context: ModelContext
+    private var realm: Realm {
+        // Access the globally initialized Realm instance
+        try! Realm()
+    }
 
-    init(context: ModelContext) {
-        self.context = context
+    init() {
         loadSearchHistory()
     }
 
     func searchUsers() async {
-        guard !username.isEmpty else { return }
+        guard !username.isEmpty else {
+            searchResults = [] // Clear the results
+            errorMessage = nil // Reset any previous error
+            return }
         isLoading = true
         errorMessage = nil
 
@@ -44,16 +49,14 @@ class MainViewModel: ObservableObject {
     }
 
     func saveSearch() {
-        // Avoid duplicates
-        guard !searchHistory.contains(where: { $0.username == username }) else { return }
-
+        // Create a new search history entry
         let newSearch = SearchHistory(username: username)
-        searchHistory.append(newSearch)
 
-        // Save to SwiftData
-        context.insert(newSearch)
         do {
-            try context.save()
+            try realm.write {
+                realm.add(newSearch) // Allow duplicates
+            }
+            loadSearchHistory() // Reload history to update the UI
         } catch {
             errorMessage = "Failed to save search history: \(error.localizedDescription)"
             print(errorMessage ?? "Unknown error")
@@ -61,24 +64,18 @@ class MainViewModel: ObservableObject {
     }
 
     func loadSearchHistory() {
-        do {
-            // Fetch all saved search history from SwiftData
-            let history = try context.fetch(FetchDescriptor<SearchHistory>())
-            searchHistory = history
-        } catch {
-            errorMessage = "Failed to load search history: \(error.localizedDescription)"
-            print(errorMessage ?? "Unknown error")
-        }
+        let history = realm.objects(SearchHistory.self).sorted(byKeyPath: "timestamp", ascending: false)
+        self.searchHistory = Array(history)
     }
-
+    
     func deleteHistory(item: SearchHistory) {
-        // Remove from UI
-        searchHistory.removeAll { $0.id == item.id }
-
-        // Delete from SwiftData
-        context.delete(item)
         do {
-            try context.save()
+            try realm.write {
+                if let objectToDelete = realm.object(ofType: SearchHistory.self, forPrimaryKey: item.id) {
+                    realm.delete(objectToDelete)
+                }
+            }
+            loadSearchHistory() // Reload history to update the UI
         } catch {
             errorMessage = "Failed to delete search history: \(error.localizedDescription)"
             print(errorMessage ?? "Unknown error")

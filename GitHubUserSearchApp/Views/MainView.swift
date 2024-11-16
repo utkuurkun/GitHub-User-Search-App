@@ -6,13 +6,13 @@
 //
 
 import SwiftUI
-import SwiftData
+import RealmSwift
 
 struct MainView: View {
     @StateObject private var viewModel: MainViewModel
 
-    init(context: ModelContext) {
-        _viewModel = StateObject(wrappedValue: MainViewModel(context: context))
+    init() {
+        _viewModel = StateObject(wrappedValue: MainViewModel())
     }
 
     var body: some View {
@@ -36,6 +36,8 @@ struct MainView: View {
                     if viewModel.isLoading {
                         ProgressView("Searching...")
                             .foregroundColor(.black)
+                            .transition(.opacity) // Add fade-in/fade-out animation
+                            .animation(.easeInOut, value: viewModel.isLoading)
                     }
 
                     // Results and History List
@@ -44,7 +46,7 @@ struct MainView: View {
                 .padding()
             }
             .navigationTitle("")
-            .alert("Error", isPresented: Binding<Bool>(
+            .alert("Something Went Wrong", isPresented: Binding<Bool>(
                 get: { viewModel.errorMessage != nil },
                 set: { _ in viewModel.errorMessage = nil }
             )) {
@@ -52,6 +54,8 @@ struct MainView: View {
             } message: {
                 if let errorMessage = viewModel.errorMessage {
                     Text(errorMessage)
+                        .font(.body)
+                        .foregroundColor(.red)
                 }
             }
         }
@@ -86,44 +90,57 @@ struct MainView: View {
     private var resultsAndHistoryList: some View {
         List {
             // Search Results Section
-            Section(header: Text("Search Results").font(.headline).foregroundColor(.black)) {
-                ForEach(viewModel.searchResults) { user in
-                    NavigationLink(destination: UserDetailView(user: user)) {
-                        HStack {
-                            AsyncImage(url: URL(string: user.avatar_url)) { image in
-                                image.resizable()
-                                     .scaledToFit()
-                                     .frame(width: 50, height: 50)
-                                     .clipShape(Circle())
-                            } placeholder: {
-                                Circle()
-                                    .fill(Color.gray.opacity(0.5))
-                                    .frame(width: 50, height: 50)
+            if viewModel.searchResults.isEmpty {
+                Section(header: Text("Search Results").font(.headline).foregroundColor(.black)) {
+                    Text("Please enter a username to search.")
+                        .foregroundColor(.gray)
+                }
+            } else {
+                Section(header: Text("Search Results").font(.headline).foregroundColor(.black)) {
+                    ForEach(viewModel.searchResults) { user in
+                        NavigationLink(destination: UserDetailView(user: user)) {
+                            HStack {
+                                AsyncImage(url: URL(string: user.avatar_url)) { image in
+                                    image.resizable()
+                                         .scaledToFit()
+                                         .frame(width: 50, height: 50)
+                                         .clipShape(Circle())
+                                } placeholder: {
+                                    ProgressView()
+                                        .frame(width: 50, height: 50)
+                                }
+                                Text(user.login)
+                                    .foregroundColor(.black)
                             }
-                            Text(user.login) // Updated to `login` for API compliance
-                                .foregroundColor(.black)
                         }
                     }
                 }
             }
 
             // Search History Section
-            Section(header: Text("Search History").font(.headline).foregroundColor(.black)) {
-                ForEach(viewModel.searchHistory) { historyItem in
-                    Button(action: {
-                        viewModel.username = historyItem.username // Set the username
-                        Task {
-                            await viewModel.searchUsers() // Trigger search
+            if viewModel.searchHistory.isEmpty {
+                Section(header: Text("Search History").font(.headline).foregroundColor(.black)) {
+                    Text("No search history.")
+                        .foregroundColor(.gray)
+                }
+            } else {
+                Section(header: Text("Search History").font(.headline).foregroundColor(.black)) {
+                    ForEach(viewModel.searchHistory) { historyItem in
+                        Button(action: {
+                            viewModel.username = historyItem.username
+                            Task {
+                                await viewModel.searchUsers()
+                            }
+                        }) {
+                            Text(historyItem.username)
+                                .foregroundColor(.blue)
                         }
-                    }) {
-                        Text(historyItem.username)
-                            .foregroundColor(.blue)
-                    }
-                    .swipeActions(edge: .trailing) {
-                        Button(role: .destructive) {
-                            viewModel.deleteHistory(item: historyItem)
-                        } label: {
-                            Label("Delete", systemImage: "trash")
+                        .swipeActions(edge: .trailing) {
+                            Button(role: .destructive) {
+                                viewModel.deleteHistory(item: historyItem)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
                         }
                     }
                 }
@@ -131,17 +148,4 @@ struct MainView: View {
         }
         .listStyle(InsetGroupedListStyle())
     }
-}
-
-#Preview {
-    let container = try! ModelContainer(for: SearchHistory.self) // Create container
-    let context = container.mainContext // Get the context
-
-    // Add mock data to the context for preview purposes
-    let mockSearch1 = SearchHistory(username: "mockuser1")
-    let mockSearch2 = SearchHistory(username: "mockuser2")
-    context.insert(mockSearch1)
-    context.insert(mockSearch2)
-
-    return MainView(context: context)
 }

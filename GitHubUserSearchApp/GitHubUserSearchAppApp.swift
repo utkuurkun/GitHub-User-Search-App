@@ -6,27 +6,34 @@
 //
 
 import SwiftUI
-import SwiftData
+import RealmSwift
 
 @main
-struct GitHubUserSearchAppApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            SearchHistory.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
-
+struct GitHubUserSearchAppApp: SwiftUI.App {
     var body: some Scene {
-            WindowGroup {
-                MainView(context: sharedModelContainer.mainContext) // Pass the context to MainView
-            }
-            .modelContainer(sharedModelContainer)
+        WindowGroup {
+            MainView() // No context is needed anymore
+        }
+    }
+
+    init() {
+        configureRealm()
+    }
+
+    private func configureRealm() {
+        // Optional: Specify a custom configuration
+        let config = Realm.Configuration(
+            schemaVersion: 1, 
+            deleteRealmIfMigrationNeeded: true // Since the app is for dev purposes
+        )
+        
+        Realm.Configuration.defaultConfiguration = config
+
+        // Verify Realm Initialization
+        do {
+            _ = try Realm() // Initializes Realm to ensure it's correctly configured
+        } catch {
+            fatalError("Failed to initialize Realm: \(error.localizedDescription)")
+        }
     }
 }

@@ -5,13 +5,16 @@
 //  Created by Utku Urkun on 16.11.2024.
 //
 
-import SwiftData
+import RealmSwift
+import Foundation
 
-@Model
-final class SearchHistory {
-    @Attribute(.unique) var username: String // Username is unique to avoid duplicates
+class SearchHistory: Object, Identifiable {
+    @Persisted(primaryKey: true) var id: UUID = UUID()
+    @Persisted var username: String
+    @Persisted var timestamp: Date = Date() // Automatically set the current date and time
 
-    init(username: String) {
+    convenience init(username: String) {
+        self.init()
         self.username = username
     }
 }
