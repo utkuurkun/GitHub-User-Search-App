@@ -12,7 +12,7 @@ import SwiftData
 struct GitHubUserSearchAppApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            SearchHistory.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -24,9 +24,9 @@ struct GitHubUserSearchAppApp: App {
     }()
 
     var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
-        .modelContainer(sharedModelContainer)
+            WindowGroup {
+                MainView(context: sharedModelContainer.mainContext) // Pass the context to MainView
+            }
+            .modelContainer(sharedModelContainer)
     }
 }
