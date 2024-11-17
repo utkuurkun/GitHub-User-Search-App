@@ -7,7 +7,7 @@
 
 import Foundation
 
-class GitHubService {
+class GitHubService: GitHubServiceProtocol {
     static let shared = GitHubService()
     private init() {}
 
@@ -25,4 +25,24 @@ class GitHubService {
         let decodedResponse = try JSONDecoder().decode(GitHubSearchResponse.self, from: data)
         return decodedResponse.items
     }
+    
+    func getUserDetails(username: String) async throws -> GitHubUserDetails {
+            guard let url = URL(string: "https://api.github.com/users/\(username)") else {
+                throw URLError(.badURL)
+            }
+
+            let (data, response) = try await URLSession.shared.data(from: url)
+
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                throw URLError(.badServerResponse)
+            }
+
+            let decodedDetails = try JSONDecoder().decode(GitHubUserDetails.self, from: data)
+            return decodedDetails
+        }
+}
+
+protocol GitHubServiceProtocol {
+    func searchUsers(username: String) async throws -> [GitHubUser]
+    func getUserDetails(username: String) async throws -> GitHubUserDetails
 }

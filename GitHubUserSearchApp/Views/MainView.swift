@@ -10,37 +10,32 @@ import RealmSwift
 
 struct MainView: View {
     @StateObject private var viewModel: MainViewModel
-
+    
     init() {
         _viewModel = StateObject(wrappedValue: MainViewModel())
     }
-
+    
     var body: some View {
         NavigationView {
             ZStack {
-                // Background color
+             
                 Color(hex: "CBDEFF")
                     .ignoresSafeArea()
-
+                
                 VStack(spacing: 20) {
-                    // Title
                     Text("GitHub User Search")
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .foregroundColor(.black)
-
-                    // Search Field
+                    
                     searchField
-
-                    // Loading Indicator
+                    
                     if viewModel.isLoading {
                         ProgressView("Searching...")
                             .foregroundColor(.black)
-                            .transition(.opacity) // Add fade-in/fade-out animation
+                            .transition(.opacity)
                             .animation(.easeInOut, value: viewModel.isLoading)
                     }
-
-                    // Results and History List
                     resultsAndHistoryList
                 }
                 .padding()
@@ -60,8 +55,7 @@ struct MainView: View {
             }
         }
     }
-
-    // MARK: - Search Field
+    
     private var searchField: some View {
         HStack {
             TextField("Enter GitHub username", text: $viewModel.username)
@@ -70,7 +64,7 @@ struct MainView: View {
                 .cornerRadius(10)
                 .foregroundColor(.black)
                 .padding(.horizontal)
-
+            
             Button(action: {
                 Task {
                     await viewModel.searchUsers()
@@ -85,62 +79,68 @@ struct MainView: View {
             }
         }
     }
-
-    // MARK: - Results and History List
+    
     private var resultsAndHistoryList: some View {
         List {
-            // Search Results Section
+            searchResultsSection
+            searchHistorySection
+        }
+        .listStyle(InsetGroupedListStyle())
+    }
+    
+    private var searchResultsSection: some View {
+        Section(header: Text("Search Results").font(.headline).foregroundColor(.black)) {
             if viewModel.searchResults.isEmpty {
-                Section(header: Text("Search Results").font(.headline).foregroundColor(.black)) {
-                    Text("Please enter a username to search.")
-                        .foregroundColor(.gray)
-                }
+                Text("Please enter a username to search.")
+                    .foregroundColor(.gray)
             } else {
-                Section(header: Text("Search Results").font(.headline).foregroundColor(.black)) {
-                    ForEach(viewModel.searchResults) { user in
-                        NavigationLink(destination: UserDetailView(user: user)) {
-                            HStack {
-                                AsyncImage(url: URL(string: user.avatar_url)) { image in
-                                    image.resizable()
-                                         .scaledToFit()
-                                         .frame(width: 50, height: 50)
-                                         .clipShape(Circle())
-                                } placeholder: {
-                                    ProgressView()
-                                        .frame(width: 50, height: 50)
-                                }
-                                Text(user.login)
-                                    .foregroundColor(.black)
+                ForEach(viewModel.searchResults) { user in
+                    NavigationLink(
+                        destination: UserDetailView(viewModel: UserDetailViewModel(username: user.login))
+                    ) {
+                        HStack {
+                            AsyncImage(url: URL(string: user.avatar_url)) { image in
+                                image.resizable()
+                                    .scaledToFit()
+                                    .frame(width: 50, height: 50)
+                                    .clipShape(Circle())
+                            } placeholder: {
+                                ProgressView()
+                                    .frame(width: 50, height: 50)
                             }
+
+                            Text(user.login)
+                                .foregroundColor(.black)
                         }
+                        .padding(.vertical, 5)
                     }
+                    .buttonStyle(PlainButtonStyle())
                 }
             }
-
-            // Search History Section
+        }
+    }
+    
+    private var searchHistorySection: some View {
+        Section(header: Text("Search History").font(.headline).foregroundColor(.black)) {
             if viewModel.searchHistory.isEmpty {
-                Section(header: Text("Search History").font(.headline).foregroundColor(.black)) {
-                    Text("No search history.")
-                        .foregroundColor(.gray)
-                }
+                Text("No search history.")
+                    .foregroundColor(.gray)
             } else {
-                Section(header: Text("Search History").font(.headline).foregroundColor(.black)) {
-                    ForEach(viewModel.searchHistory) { historyItem in
-                        Button(action: {
-                            viewModel.username = historyItem.username
-                            Task {
-                                await viewModel.searchUsers()
-                            }
-                        }) {
-                            Text(historyItem.username)
-                                .foregroundColor(.blue)
+                ForEach(viewModel.searchHistory) { historyItem in
+                    Button(action: {
+                        viewModel.username = historyItem.username
+                        Task {
+                            await viewModel.searchUsers()
                         }
-                        .swipeActions(edge: .trailing) {
-                            Button(role: .destructive) {
-                                viewModel.deleteHistory(item: historyItem)
-                            } label: {
-                                Label("Delete", systemImage: "trash")
-                            }
+                    }) {
+                        Text(historyItem.username)
+                            .foregroundColor(.blue)
+                    }
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            viewModel.deleteHistory(item: historyItem)
+                        } label: {
+                            Label("Delete", systemImage: "trash")
                         }
                     }
                 }

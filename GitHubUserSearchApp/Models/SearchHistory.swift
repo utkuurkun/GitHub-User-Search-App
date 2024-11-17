@@ -11,7 +11,7 @@ import Foundation
 class SearchHistory: Object, Identifiable {
     @Persisted(primaryKey: true) var id: UUID = UUID()
     @Persisted var username: String
-    @Persisted var timestamp: Date = Date() // Automatically set the current date and time
+    @Persisted var timestamp: Date = Date() 
 
     convenience init(username: String) {
         self.init()

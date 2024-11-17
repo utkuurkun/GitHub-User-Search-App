@@ -8,42 +8,90 @@
 import SwiftUI
 
 struct UserDetailView: View {
-    let user: GitHubUser
+    @StateObject var viewModel: UserDetailViewModel
 
     var body: some View {
         ZStack {
-            // Background color matching the theme
+            // Background Color
             Color(hex: "CBDEFF")
-                .ignoresSafeArea()
+                .ignoresSafeArea(edges: .all)
 
-            VStack(spacing: 20) {
-                // Avatar
-                AsyncImage(url: URL(string: user.avatar_url)) { image in
-                    image.resizable()
-                         .scaledToFit()
-                         .frame(width: 100, height: 100)
-                         .clipShape(Circle())
-                         .overlay(Circle().stroke(Color.blue, lineWidth: 2))
-                } placeholder: {
-                    Circle()
-                        .fill(Color.gray.opacity(0.5))
-                        .frame(width: 100, height: 100)
+            if viewModel.isLoading {
+                ProgressView("Loading details...")
+                    .font(.headline)
+                    .foregroundColor(.gray)
+            } else if let errorMessage = viewModel.errorMessage {
+                // Error State
+                VStack {
+                    Text(errorMessage)
+                        .font(.body)
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                        .padding()
+
+                    Button(action: {
+                        if !viewModel.isLoading {
+                            viewModel.fetchUserDetails()
+                        }
+                    }) {
+                        Text(viewModel.isLoading ? "Loading..." : "Retry")
+                            .padding()
+                            .background(viewModel.isLoading ? Color.gray : Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                    }
+                    .disabled(viewModel.isLoading)
                 }
+            } else if let userDetails = viewModel.userDetails {
+                // User Details State
+                ScrollView {
+                    VStack(spacing: 16) {
+                        // User Avatar
+                        AsyncImage(url: URL(string: userDetails.avatar_url)) { image in
+                            image.resizable()
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                                .clipShape(Circle())
+                        } placeholder: {
+                            ProgressView()
+                        }
 
-                // Username
-                Text(user.login)
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(.black)
+                        // Name and Bio
+                        Text(userDetails.name ?? "No Name")
+                            .font(.title)
+                            .padding(.bottom, 5)
+                        Text(userDetails.bio ?? "No Bio")
+                            .italic()
+                            .foregroundColor(.gray)
 
-                // GitHub Profile Link
-                Link("View on GitHub", destination: URL(string: user.html_url)!)
+                        // Repositories and Followers Info
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Repositories: \(userDetails.public_repos)")
+                            Text("Followers: \(userDetails.followers)")
+                            Text("Following: \(userDetails.following)")
+                        }
+
+                        // Profile Link
+                        if let profileURL = URL(string: userDetails.html_url), UIApplication.shared.canOpenURL(profileURL) {
+                            Link("Visit Profile", destination: profileURL)
+                                .padding()
+                                .foregroundColor(.white)
+                                .background(Color.blue)
+                                .cornerRadius(10)
+                        } else {
+                            Text("Profile link not available")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                        }
+                    }
+                    .padding()
+                    .background(Color(hex: "CBDEFF"))
+                }
+            } else {
+                Text("No details available.")
                     .font(.body)
-                    .foregroundColor(.blue)
+                    .foregroundColor(.gray)
             }
-            .padding()
         }
-        .navigationTitle("User Details")
-        .navigationBarTitleDisplayMode(.inline)
     }
 }

@@ -12,7 +12,13 @@
     "testTimeoutsEnabled" : true
   },
   "testTargets" : [
-
+    {
+      "target" : {
+        "containerPath" : "container:GitHubUserSearchApp.xcodeproj",
+        "identifier" : "185C4F1A2CE7E51900C60340",
+        "name" : "GitHubUserSearchAppTests"
+      }
+    }
   ],
   "version" : 1
 }

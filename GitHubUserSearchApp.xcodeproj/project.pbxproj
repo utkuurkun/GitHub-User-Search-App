@@ -48,15 +48,31 @@
 		185C4F252CE7E51900C60340 /* GitHubUserSearchAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GitHubUserSearchAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		18B0E8E42CE97665001BC267 /* Exceptions for "GitHubUserSearchApp" folder in "GitHubUserSearchAppTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Tests/MainViewModelTests.swift,
+			);
+			target = 185C4F1A2CE7E51900C60340 /* GitHubUserSearchAppTests */;
+		};
+		18B0E8E52CE97702001BC267 /* Exceptions for "GitHubUserSearchApp" folder in "GitHubUserSearchApp" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Tests/MainViewModelTests.swift,
+			);
+			target = 185C4F082CE7E51700C60340 /* GitHubUserSearchApp */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		185C4F0B2CE7E51700C60340 /* GitHubUserSearchApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				18B0E8E52CE97702001BC267 /* Exceptions for "GitHubUserSearchApp" folder in "GitHubUserSearchApp" target */,
+				18B0E8E42CE97665001BC267 /* Exceptions for "GitHubUserSearchApp" folder in "GitHubUserSearchAppTests" target */,
+			);
 			path = GitHubUserSearchApp;
-			sourceTree = "<group>";
-		};
-		185C4F412CE7F3C000C60340 /* Tests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Tests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -91,7 +107,6 @@
 			isa = PBXGroup;
 			children = (
 				185C4F0B2CE7E51700C60340 /* GitHubUserSearchApp */,
-				185C4F412CE7F3C000C60340 /* Tests */,
 				18B0E8A92CE90CD8001BC267 /* Frameworks */,
 				185C4F0A2CE7E51700C60340 /* Products */,
 			);
@@ -132,7 +147,6 @@
 			);
 			fileSystemSynchronizedGroups = (
 				185C4F0B2CE7E51700C60340 /* GitHubUserSearchApp */,
-				185C4F412CE7F3C000C60340 /* Tests */,
 			);
 			name = GitHubUserSearchApp;
 			packageProductDependencies = (
@@ -197,6 +211,7 @@
 					};
 					185C4F1A2CE7E51900C60340 = {
 						CreatedOnToolsVersion = 16.0;
+						LastSwiftMigration = 1600;
 						TestTargetID = 185C4F082CE7E51700C60340;
 					};
 					185C4F242CE7E51900C60340 = {
@@ -478,6 +493,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = RMFU3783R5;
@@ -487,6 +503,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.Urkun.GitHubUserSearchAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GitHubUserSearchApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GitHubUserSearchApp";
@@ -497,6 +514,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = RMFU3783R5;

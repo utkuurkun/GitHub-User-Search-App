@@ -10,14 +10,14 @@ import RealmSwift
 
 @MainActor
 class MainViewModel: ObservableObject {
-    @Published var username: String = "" // User input for search
-    @Published var searchResults: [GitHubUser] = [] // Results from GitHub API
-    @Published var searchHistory: [SearchHistory] = [] // Persisted search history
-    @Published var isLoading: Bool = false // Indicates if a search is in progress
-    @Published var errorMessage: String? = nil // Error handling
+    @Published var username: String = ""
+    @Published var searchResults: [GitHubUser] = []
+    @Published var searchHistory: [SearchHistory] = []
+    @Published var isLoading: Bool = false
+    @Published var errorMessage: String? = nil
+    @Published var selectedUserDetails: GitHubUserDetails? = nil
 
     private var realm: Realm {
-        // Access the globally initialized Realm instance
         try! Realm()
     }
 
@@ -27,18 +27,15 @@ class MainViewModel: ObservableObject {
 
     func searchUsers() async {
         guard !username.isEmpty else {
-            searchResults = [] // Clear the results
-            errorMessage = nil // Reset any previous error
+            searchResults = []
+            errorMessage = nil
             return }
         isLoading = true
         errorMessage = nil
 
         do {
-            // Fetch users from GitHub API
             let results = try await GitHubService.shared.searchUsers(username: username)
             self.searchResults = results
-
-            // Save the search
             saveSearch()
         } catch {
             errorMessage = "Failed to fetch users: \(error.localizedDescription)"
@@ -49,14 +46,13 @@ class MainViewModel: ObservableObject {
     }
 
     func saveSearch() {
-        // Create a new search history entry
         let newSearch = SearchHistory(username: username)
 
         do {
             try realm.write {
-                realm.add(newSearch) // Allow duplicates
+                realm.add(newSearch)
             }
-            loadSearchHistory() // Reload history to update the UI
+            loadSearchHistory()
         } catch {
             errorMessage = "Failed to save search history: \(error.localizedDescription)"
             print(errorMessage ?? "Unknown error")
@@ -75,7 +71,7 @@ class MainViewModel: ObservableObject {
                     realm.delete(objectToDelete)
                 }
             }
-            loadSearchHistory() // Reload history to update the UI
+            loadSearchHistory()
         } catch {
             errorMessage = "Failed to delete search history: \(error.localizedDescription)"
             print(errorMessage ?? "Unknown error")

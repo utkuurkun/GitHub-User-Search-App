@@ -12,7 +12,7 @@ import RealmSwift
 struct GitHubUserSearchAppApp: SwiftUI.App {
     var body: some Scene {
         WindowGroup {
-            MainView() // No context is needed anymore
+            MainView()
         }
     }
 
@@ -21,7 +21,7 @@ struct GitHubUserSearchAppApp: SwiftUI.App {
     }
 
     private func configureRealm() {
-        // Optional: Specify a custom configuration
+        
         let config = Realm.Configuration(
             schemaVersion: 1, 
             deleteRealmIfMigrationNeeded: true // Since the app is for dev purposes
@@ -29,9 +29,8 @@ struct GitHubUserSearchAppApp: SwiftUI.App {
         
         Realm.Configuration.defaultConfiguration = config
 
-        // Verify Realm Initialization
         do {
-            _ = try Realm() // Initializes Realm to ensure it's correctly configured
+            _ = try Realm()
         } catch {
             fatalError("Failed to initialize Realm: \(error.localizedDescription)")
         }
