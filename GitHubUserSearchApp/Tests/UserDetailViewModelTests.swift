@@ -6,30 +6,55 @@
 //
 
 import XCTest
+@testable import GitHubUserSearchApp
 
+@MainActor
 final class UserDetailViewModelTests: XCTestCase {
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+    var viewModel: UserDetailViewModel!
+
+    override func setUp() {
+        super.setUp()
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    override func tearDown() {
+        viewModel = nil
+        super.tearDown()
     }
 
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+    func testFetchUserDetailsWithUsername() async {
+        // Given
+        viewModel = UserDetailViewModel(username: "utkuurkun")
+
+        // When
+        await viewModel.fetchUserDetails()
+
+        // Then
+        XCTAssertNotNil(viewModel.userDetails, "User details should not be nil for a valid username.")
+        XCTAssertEqual(viewModel.userDetails?.login, "utkuurkun", "The username in user details should match the input.")
     }
 
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
+    func testFetchUserDetailsNetworkError() async {
+        // Simulate network disconnection
+        // Temporarily disable internet or intercept the request to simulate failure
+        viewModel = UserDetailViewModel(username: "anyusername")
+
+        // When
+        
+        await viewModel.fetchUserDetails()
+
+        // Then
+        XCTAssertNil(viewModel.userDetails, "User details should be nil for a network error.")
+        XCTAssertNotNil(viewModel.errorMessage, "Error message should be set for a network error.")
     }
 
+    func testLoadingStateDuringFetch() async {
+        // Given
+        viewModel = UserDetailViewModel(username: "mojombo")
+
+        // When
+        XCTAssertTrue(viewModel.isLoading, "isLoading should be true when fetch begins.")
+        await viewModel.fetchUserDetails()
+        XCTAssertFalse(viewModel.isLoading, "isLoading should be false when fetch completes.")
+    }
 }

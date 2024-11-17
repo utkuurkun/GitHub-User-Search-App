@@ -12,7 +12,6 @@ struct UserDetailView: View {
 
     var body: some View {
         ZStack {
-            // Background Color
             Color(hex: "CBDEFF")
                 .ignoresSafeArea(edges: .all)
 
@@ -21,7 +20,6 @@ struct UserDetailView: View {
                     .font(.headline)
                     .foregroundColor(.gray)
             } else if let errorMessage = viewModel.errorMessage {
-                // Error State
                 VStack {
                     Text(errorMessage)
                         .font(.body)
@@ -56,7 +54,6 @@ struct UserDetailView: View {
                             ProgressView()
                         }
 
-                        // Name and Bio
                         Text(userDetails.name ?? "No Name")
                             .font(.title)
                             .padding(.bottom, 5)
@@ -64,14 +61,12 @@ struct UserDetailView: View {
                             .italic()
                             .foregroundColor(.gray)
 
-                        // Repositories and Followers Info
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Repositories: \(userDetails.public_repos)")
                             Text("Followers: \(userDetails.followers)")
                             Text("Following: \(userDetails.following)")
                         }
 
-                        // Profile Link
                         if let profileURL = URL(string: userDetails.html_url), UIApplication.shared.canOpenURL(profileURL) {
                             Link("Visit Profile", destination: profileURL)
                                 .padding()

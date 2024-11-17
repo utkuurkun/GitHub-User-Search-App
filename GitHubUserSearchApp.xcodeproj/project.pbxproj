@@ -53,6 +53,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Tests/MainViewModelTests.swift,
+				Tests/UserDetailViewModelTests.swift,
 			);
 			target = 185C4F1A2CE7E51900C60340 /* GitHubUserSearchAppTests */;
 		};
@@ -60,6 +61,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Tests/MainViewModelTests.swift,
+				Tests/UserDetailViewModelTests.swift,
 			);
 			target = 185C4F082CE7E51700C60340 /* GitHubUserSearchApp */;
 		};
